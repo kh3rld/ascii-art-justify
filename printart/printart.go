@@ -3,17 +3,20 @@ package printart
 import (
 	"fmt"
 	"strings"
+	"syscall"
+	"unsafe"
 )
 
 func PrintArt(bannerFileSlice []string, inputString string, alignFlag string) {
 	align := ""
 	if alignFlag != "" {
 		align = strings.ToLower(alignFlag[8:])
-
 	} else {
 		align = "left"
 		// fmt.Println("align should have a value")
 	}
+
+	// fmt.Println(align)
 
 	if inputString == "\\n" {
 		fmt.Println()
@@ -58,37 +61,84 @@ func PrintArt(bannerFileSlice []string, inputString string, alignFlag string) {
 		const asciiHeight = 8
 		// fmt.Println(align)
 
+		width, _, err := getTerminalSize()
+		if err != nil {
+			fmt.Println("Error getting terminal size:", err)
+			return
+		}
+		terminalSize := width
+		var art strings.Builder
+
+		// fmt.Println(terminalSize)
 		for j := 0; j < asciiHeight; j++ {
-			switch align {
-			case "left":
-				for _, char := range text {
+			for _, char := range text {
 
-					startingIndex := int(char-32)*9 + 1
-					fmt.Printf(bannerFileSlice[startingIndex+j])
-				}
-				fmt.Println()
-			case "rignt":
-				for _, char := range text {
-
-					startingIndex := int(char-32)*9 + 1
-					fmt.Printf(bannerFileSlice[startingIndex+j])
-				}
-				fmt.Println()
-			case "center":
-				for _, char := range text {
-
-					startingIndex := int(char-32)*9 + 1
-					fmt.Printf(bannerFileSlice[startingIndex+j])
-				}
-				fmt.Println()
-			case "justify":
-				for _, char := range text {
-
-					startingIndex := int(char-32)*9 + 1
-					fmt.Printf(bannerFileSlice[startingIndex+j])
-				}
-				fmt.Println()
+				startingIndex := int(char-32)*9 + 1
+				art.WriteString(bannerFileSlice[startingIndex+j])
 			}
+			art.WriteString("\n")
+		}
+		result := art.String()
+		alignedLines := []string{}
+		switch align {
+		case "left":
+			fmt.Println(result)
+		case "right":
+			artSlice := strings.Split(result, "\n")
+			artLen := len(artSlice[0])
+			// fmt.Println(artLen)
+			spacesRem := terminalSize - artLen
+			// fmt.Println(artLen)
+
+			if spacesRem < 0 {
+				fmt.Println(result)
+				return
+			}
+			for _, line := range artSlice {
+				alignedLines = append(alignedLines, strings.Repeat(" ", spacesRem)+line)
+			}
+			fmt.Println(strings.Join(alignedLines, "\n"))
+			// fmt.Printf("%q", repeated)
+
+			// case "center":
+			// 	for _, char := range text {
+
+			// 		startingIndex := int(char-32)*9 + 1
+			// 		fmt.Printf(bannerFileSlice[startingIndex+j])
+			// 	}
+			// 	fmt.Println()
+			// case "justify":
+			// 	for _, char := range text {
+
+			// 		startingIndex := int(char-32)*9 + 1
+			// 		fmt.Printf(bannerFileSlice[startingIndex+j])
+			// 	}
+			// 	fmt.Println()
 		}
 	}
+}
+
+type Winsize struct {
+	Row    uint16
+	Col    uint16
+	Xpixel uint16
+	Ypixel uint16
+}
+
+var syscallGetWinsize = func(ws *Winsize) (uintptr, uintptr, syscall.Errno) {
+	return syscall.Syscall(syscall.SYS_IOCTL,
+
+		uintptr(syscall.Stdin),
+		uintptr(syscall.TIOCGWINSZ),
+		uintptr(unsafe.Pointer(ws)),
+	)
+}
+
+func getTerminalSize() (int, int, error) {
+	ws := &Winsize{}
+	_, _, err := syscallGetWinsize(ws)
+	if err != 0 {
+		return 0, 0, err
+	}
+	return int(ws.Col), int(ws.Row), nil
 }
