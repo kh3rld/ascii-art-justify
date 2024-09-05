@@ -86,9 +86,8 @@ func PrintArt(bannerFileSlice []string, inputString string, alignFlag string) {
 		case "right":
 			artSlice := strings.Split(result, "\n")
 			artLen := len(artSlice[0])
-			// fmt.Println(artLen)
+	
 			spacesRem := terminalSize - artLen
-			// fmt.Println(artLen)
 
 			if spacesRem < 0 {
 				fmt.Println(result)
@@ -98,15 +97,21 @@ func PrintArt(bannerFileSlice []string, inputString string, alignFlag string) {
 				alignedLines = append(alignedLines, strings.Repeat(" ", spacesRem)+line)
 			}
 			fmt.Println(strings.Join(alignedLines, "\n"))
-			// fmt.Printf("%q", repeated)
 
-			// case "center":
-			// 	for _, char := range text {
+		case "center":
+			artSlice := strings.Split(result, "\n")
+			artLen := len(artSlice[0])
 
-			// 		startingIndex := int(char-32)*9 + 1
-			// 		fmt.Printf(bannerFileSlice[startingIndex+j])
-			// 	}
-			// 	fmt.Println()
+			spacesRem := terminalSize - artLen
+			
+			if spacesRem < 0 {
+				fmt.Println(result)
+				return
+			}
+			for _, line := range artSlice {
+				alignedLines = append(alignedLines, strings.Repeat(" ", spacesRem/2)+line)
+			}
+			fmt.Println(strings.Join(alignedLines, "\n"))
 			// case "justify":
 			// 	for _, char := range text {
 
