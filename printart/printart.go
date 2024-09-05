@@ -11,12 +11,16 @@ func PrintArt(bannerFileSlice []string, inputString string, alignFlag string) {
 	align := ""
 	if alignFlag != "" {
 		align = strings.ToLower(alignFlag[8:])
+		if (len(align) > 0) && !(align == "left" || align == "right" || align == "justify" || align == "center"){
+			fmt.Println("Usage: go run . [OPTION] [STRING] [BANNER]\n\nExample: go run . --align=right something standard")
+			return
+		}
 	} else {
 		align = "left"
-		// fmt.Println("align should have a value")
 	}
 
 	// fmt.Println(align)
+	// fmt.Println(alignFlag)
 
 	if inputString == "\\n" {
 		fmt.Println()
@@ -78,6 +82,8 @@ func PrintArt(bannerFileSlice []string, inputString string, alignFlag string) {
 			}
 			art.WriteString("\n")
 		}
+
+
 		result := art.String()
 		alignedLines := []string{}
 		switch align {
