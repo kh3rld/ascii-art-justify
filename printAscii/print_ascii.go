@@ -15,6 +15,11 @@ type Winsize struct {
 }
 
 func PrintArt(str string, asciiArtGrid [][]string, align string) error {
+	terminalWidth, _, err := getTerminalSize()
+	if err != nil {
+		return err
+	}
+
 	switch str {
 	case "":
 		fmt.Print()
@@ -55,6 +60,9 @@ func PrintArt(str string, asciiArtGrid [][]string, align string) error {
 					artLines = append(artLines, line)
 				}
 
+				// Align the ASCII art
+				alignedArt := alignArt(artLines, align, terminalWidth)
+				fmt.Println(alignedArt)
 			}
 		}
 	}
@@ -77,4 +85,21 @@ func getTerminalSize() (w, h int, err error) {
 	w = int(ws.Col)
 	h = int(ws.Row)
 	return
+}
+
+func alignArt(artLines []string, align string, width int) string {
+	var alignedLines []string
+	for _, line := range artLines {
+		switch align {
+		case "center":
+			alignedLines = append(alignedLines, centerAlign(line, width))
+		case "left":
+			alignedLines = append(alignedLines, line)
+		case "right":
+			alignedLines = append(alignedLines, rightAlign(line, width))
+		case "justify":
+			alignedLines = append(alignedLines, justifyAlign(line, width))
+		}
+	}
+	return strings.Join(alignedLines, "\n")
 }
