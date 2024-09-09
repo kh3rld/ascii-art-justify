@@ -3,7 +3,16 @@ package output
 import (
 	"fmt"
 	"strings"
+	"syscall"
+	"unsafe"
 )
+
+type Winsize struct {
+	Row    uint16
+	Col    uint16
+	Xpixel uint16
+	Ypixel uint16
+}
 
 func PrintArt(str string, asciiArtGrid [][]string, align string) error {
 	switch str {
@@ -50,4 +59,22 @@ func PrintArt(str string, asciiArtGrid [][]string, align string) error {
 		}
 	}
 	return nil
+}
+
+func getTerminalSize() (w, h int, err error) {
+	var ws Winsize
+	_, _, e := syscall.Syscall6(
+		syscall.SYS_IOCTL,
+		uintptr(syscall.Stdin),
+		uintptr(syscall.TIOCGWINSZ),
+		uintptr(unsafe.Pointer(&ws)),
+		0, 0, 0,
+	)
+	if e != 0 {
+		err = e
+		return
+	}
+	w = int(ws.Col)
+	h = int(ws.Row)
+	return
 }
