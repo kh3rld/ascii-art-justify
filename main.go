@@ -43,7 +43,7 @@ func main() {
 	})
 
 	if presentF && correctF {
-		usage.PrintUsage()
+		usage.OutputUsage()
 		return
 	}
 
