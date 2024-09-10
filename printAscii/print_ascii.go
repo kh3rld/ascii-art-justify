@@ -90,39 +90,31 @@ func rightAlign(line string, width int) string {
 }
 
 func justifyAlign(line string, width int) string {
-	// If the line is longer than or equal to the width, return the line as is
 	if len(line) >= width {
 		return line
 	}
 
-	// Split the line into words
-	words := strings.Fields(line)
-	if len(words) == 1 {
-		// If there's only one word, pad it to the right
-		return line + strings.Repeat(" ", width-len(line))
-	}
-
-	// Calculate total spaces needed
 	totalSpaces := width - len(line)
-	spaceBetweenWords := totalSpaces / (len(words) - 1) // Minimum spaces between words
-	extraSpaces := totalSpaces % (len(words) - 1)       // Extra spaces to distribute
+	spaceBetweenWords := totalSpaces / (len(line) - 1)
+	extraSpaces := totalSpaces % (len(line) - 1)
 
-	// Create a buffer to build the justified line
 	var justifiedLine strings.Builder
-	for i, word := range words {
+	for i, word := range line {
 		if i > 0 {
-			// Add minimum spaces between words
 			justifiedLine.WriteString(strings.Repeat(" ", spaceBetweenWords))
-			// Add an extra space for the first few words
+
 			if i <= extraSpaces {
 				justifiedLine.WriteString(" ")
 			}
 		}
-		// Add the word
-		justifiedLine.WriteString(word)
+		justifiedLine.WriteString(string(word))
+	}
+	justifiedResult := justifiedLine.String()
+	if len(justifiedResult) < width {
+		justifiedResult += strings.Repeat("", width-len(justifiedResult))
 	}
 
-	return justifiedLine.String()
+	return justifiedResult
 }
 
 func getTerminalSize() (w, h int, err error) {
