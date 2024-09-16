@@ -53,7 +53,10 @@ func PrintArt(str string, asciiArtGrid [][]string, align string) error {
 					artLines = append(artLines, line)
 				}
 
-				// Align the ASCII art
+				// Combine the ASCII art lines into a block of text
+				// asciiBlock := strings.Join(artLines, "\n")
+
+				// Align the entire block of ASCII art
 				alignedArt := alignArt(artLines, align, terminalWidth)
 				fmt.Println(alignedArt)
 			}
@@ -72,8 +75,8 @@ func alignArt(artLines []string, align string, width int) string {
 			alignedLines = append(alignedLines, line)
 		case "right":
 			alignedLines = append(alignedLines, rightAlign(line, width))
-		case "justify":
-			alignedLines = append(alignedLines, justifyAlign(line, width))
+			// case "justify":
+			// alignedLines = append(alignedLines, justifyAlign(line, width))
 		}
 	}
 	return strings.Join(alignedLines, "\n")
@@ -89,40 +92,69 @@ func rightAlign(line string, width int) string {
 	return strings.Repeat(" ", padding) + line
 }
 
-func justifyAlign(line string, width int) string {
-	// If the line is longer than or equal to the width, return the line as is
-	if len(line) >= width {
-		return line
+func PrintArtJustify(str string, asciiArtGrid [][]string, align string) error {
+	terminalWidth, _, err := getTerminalSize()
+	if err != nil {
+		return err
 	}
 
-	// Split the line into words
-	words := strings.Fields(line)
-	if len(words) == 1 {
-		// If there's only one word, pad it to the right
-		return line + strings.Repeat(" ", width-len(line))
-	}
+	s := strings.ReplaceAll(str, "\\n", "\n")
+	s = strings.ReplaceAll(s, "\\r", "\r")
+	s = strings.ReplaceAll(s, "\\f", "\f")
+	s = strings.ReplaceAll(s, "\\v", "\v")
+	s = strings.ReplaceAll(s, "\\t", "\t")
+	s = strings.ReplaceAll(s, "\\b", "\b")
+	s = strings.ReplaceAll(s, "\\a", "\a")
+	lines := strings.Split(s, "\n")
 
-	// Calculate total spaces needed
-	totalSpaces := width - len(line)
-	spaceBetweenWords := totalSpaces / (len(words) - 1) // Minimum spaces between words
-	extraSpaces := totalSpaces % (len(words) - 1)       // Extra spaces to distribute
+	for _, line := range lines {
+		words := strings.Fields(line)
+		if len(words) == 0 {
+			fmt.Println()
+			continue
+		}
 
-	// Create a buffer to build the justified line
-	var justifiedLine strings.Builder
-	for i, word := range words {
-		if i > 0 {
-			// Add minimum spaces between words
-			justifiedLine.WriteString(strings.Repeat(" ", spaceBetweenWords))
-			// Add an extra space for the first few words
-			if i <= extraSpaces {
-				justifiedLine.WriteString(" ")
+		var justifiedLine string
+		if len(words) == 1 {
+			justifiedLine = words[0]
+		} else {
+			totalChars := 0
+			for _, word := range words {
+				totalChars += len(word)
+			}
+			numSpaces := len(words) - 1
+			totalSpaces := terminalWidth - totalChars
+			spacesBetweenWords := totalSpaces / numSpaces
+			extraSpaces := totalSpaces % numSpaces
+
+			for i, word := range words {
+				justifiedLine += word
+				if i < len(words)-1 {
+					justifiedLine += strings.Repeat(" ", spacesBetweenWords)
+					if extraSpaces > 0 {
+						justifiedLine += " "
+						extraSpaces--
+					}
+				}
 			}
 		}
-		// Add the word
-		justifiedLine.WriteString(word)
-	}
 
-	return justifiedLine.String()
+		fmt.Println(justifiedLine)
+		printWord(justifiedLine, asciiArtGrid)
+	}
+	return nil
+}
+
+func printWord(word string, asciiArtGrid [][]string) {
+	for i := 1; i <= 8; i++ {
+		for _, char := range word {
+			index := int(char - 32)
+			if index >= 0 && index < len(asciiArtGrid) {
+				fmt.Print(asciiArtGrid[index][i])
+			}
+		}
+		fmt.Println()
+	}
 }
 
 func getTerminalSize() (w, h int, err error) {
