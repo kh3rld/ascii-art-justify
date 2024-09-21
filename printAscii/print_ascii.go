@@ -93,7 +93,9 @@ func rightAlign(line string, width int) string {
 }
 
 func PrintArtJustify(str string, asciiArtGrid [][]string, align string) error {
+	fmt.Println(str)
 	terminalWidth, _, err := getTerminalSize()
+	fmt.Println(terminalWidth)
 	if err != nil {
 		return err
 	}
@@ -106,42 +108,86 @@ func PrintArtJustify(str string, asciiArtGrid [][]string, align string) error {
 	s = strings.ReplaceAll(s, "\\b", "\b")
 	s = strings.ReplaceAll(s, "\\a", "\a")
 	lines := strings.Split(s, "\n")
-
+	var justifiedLine string
 	for _, line := range lines {
-		words := strings.Fields(line)
+
+		totalChars := 0
+		var r []rune
+
+		for _, x := range line {
+			r = append(r, x)
+		}
+
+		fmt.Println(string(r))
+		for i := range r {
+			if r[i] == ' ' {
+				r[i] = 'x'
+			} else {
+				totalChars++
+			}
+		}
+		fmt.Println(string(r))
+		words := strings.Fields(string(r))
 		if len(words) == 0 {
 			fmt.Println()
 			continue
 		}
 
-		var justifiedLine string
 		if len(words) == 1 {
 			justifiedLine = words[0]
-		} else {
-			totalChars := 0
-			for _, word := range words {
-				totalChars += len(word)
+			c := 0
+			for _, x := range justifiedLine {
+				if x == 'x' {
+					c++
+				}
 			}
+			numSpaces := c
+			fmt.Println(numSpaces)
+			fmt.Println(totalChars)
+			fmt.Println(terminalWidth)
+			totalSp := terminalWidth - len(asciiArtGrid)
+			fmt.Println(totalSp)
+			spPad := totalSp / numSpaces
+			fmt.Println(spPad)
+
+			for i := range justifiedLine {
+				// if x == 'x' {
+				// d := strings.ReplaceAll(justifiedLine, "x", " ")
+				if i < len(justifiedLine)-1 {
+					justifiedLine = strings.ReplaceAll(justifiedLine, "x", strings.Repeat(" ", spPad))
+				}
+
+				// }
+			}
+		} else {
+
+			fmt.Println(totalChars)
 			numSpaces := len(words) - 1
+			fmt.Println(numSpaces)
 			totalSpaces := terminalWidth - totalChars
 			spacesBetweenWords := totalSpaces / numSpaces
-			extraSpaces := totalSpaces % numSpaces
-
+			// extraSpaces := totalSpaces % numSpaces
 			for i, word := range words {
 				justifiedLine += word
 				if i < len(words)-1 {
-					justifiedLine += strings.Repeat(" ", spacesBetweenWords)
-					if extraSpaces > 0 {
-						justifiedLine += " "
-						extraSpaces--
-					}
+					justifiedLine += strings.Repeat("x", spacesBetweenWords)
 				}
 			}
 		}
-
-		fmt.Println(justifiedLine)
-		printWord(justifiedLine, asciiArtGrid)
 	}
+	fmt.Println(justifiedLine)
+	art := asciiArtGrid
+	r := ""
+	for _, x := range art {
+		// fmt.Println(x)
+		for _, v := range x {
+			for c := range v {
+				r = strings.ReplaceAll(string(v[c]), " ", "$")
+			}
+		}
+	}
+	fmt.Println(r)
+	printWord(justifiedLine, asciiArtGrid)
 	return nil
 }
 
@@ -151,6 +197,7 @@ func printWord(word string, asciiArtGrid [][]string) {
 			index := int(char - 32)
 			if index >= 0 && index < len(asciiArtGrid) {
 				fmt.Print(asciiArtGrid[index][i])
+				// fmt.Println(len(asciiArtGrid))
 			}
 		}
 		fmt.Println()
