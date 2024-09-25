@@ -118,7 +118,9 @@ func PrintArt(bannerFileSlice []string, inputString string, alignFlag string) {
 			}
 			fmt.Println(strings.Join(alignedLines, "\n"))
 		case "justify":
-			
+
+			inputSlice := strings.Fields(inputString)
+			inputString = strings.Join(inputSlice, " ")
 			spacePositions, asciiArtLines := spacePos(inputString, bannerFileSlice)
 			artSlice := strings.Split(result, "\n")
 			artLen := len(artSlice[0])
