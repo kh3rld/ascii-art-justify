@@ -11,7 +11,7 @@ func PrintArt(bannerFileSlice []string, inputString string, alignFlag string) {
 	align := ""
 	if alignFlag != "" {
 		align = strings.ToLower(alignFlag[8:])
-		if (len(align) > 0) && !(align == "left" || align == "right" || align == "justify" || align == "center"){
+		if (len(align) > 0) && !(align == "left" || align == "right" || align == "justify" || align == "center") {
 			fmt.Println("Usage: go run . [OPTION] [STRING] [BANNER]\n\nExample: go run . --align=right something standard")
 			return
 		}
@@ -83,7 +83,6 @@ func PrintArt(bannerFileSlice []string, inputString string, alignFlag string) {
 			art.WriteString("\n")
 		}
 
-
 		result := art.String()
 		alignedLines := []string{}
 		switch align {
@@ -92,7 +91,7 @@ func PrintArt(bannerFileSlice []string, inputString string, alignFlag string) {
 		case "right":
 			artSlice := strings.Split(result, "\n")
 			artLen := len(artSlice[0])
-	
+
 			spacesRem := terminalSize - artLen
 
 			if spacesRem < 0 {
@@ -109,7 +108,7 @@ func PrintArt(bannerFileSlice []string, inputString string, alignFlag string) {
 			artLen := len(artSlice[0])
 
 			spacesRem := terminalSize - artLen
-			
+
 			if spacesRem < 0 {
 				fmt.Println(result)
 				return
@@ -118,15 +117,65 @@ func PrintArt(bannerFileSlice []string, inputString string, alignFlag string) {
 				alignedLines = append(alignedLines, strings.Repeat(" ", spacesRem/2)+line)
 			}
 			fmt.Println(strings.Join(alignedLines, "\n"))
-			// case "justify":
-			// 	for _, char := range text {
+		case "justify":
+			
+			spacePositions, asciiArtLines := spacePos(inputString, bannerFileSlice)
+			artSlice := strings.Split(result, "\n")
+			artLen := len(artSlice[0])
 
-			// 		startingIndex := int(char-32)*9 + 1
-			// 		fmt.Printf(bannerFileSlice[startingIndex+j])
-			// 	}
-			// 	fmt.Println()
+			if artLen < terminalSize && len(spacePositions) > 0 {
+				extraSpaces := terminalSize - artLen
+				spaceToAdd := extraSpaces / len(spacePositions)
+				rem := extraSpaces % len(spacePositions)
+
+				for _, line := range asciiArtLines {
+					newLine := []rune(line)
+					offset := 0
+
+					for i, pos := range spacePositions {
+						additionalSpace := spaceToAdd
+
+						if i < rem {
+							additionalSpace++
+						}
+						adjustedPosition := pos + offset
+						newLine = append(newLine[:adjustedPosition], append([]rune(strings.Repeat(" ", additionalSpace)), newLine[adjustedPosition:]...)...)
+						offset += additionalSpace
+					}
+					alignedLines = append(alignedLines, string(newLine))
+				}
+			} else {
+				alignedLines = asciiArtLines[:]
+			}
+			fmt.Println(strings.Join(alignedLines, "\n"))
 		}
 	}
+}
+
+func spacePos(input string, reading []string) ([]int, [8]string) {
+	spacePosition := []int{}
+	totalTextWidth := 0
+	asciiArtLines := [8]string{}
+
+	for _, cha := range input {
+		startingIndex := int(cha-32)*9 + 1
+		art := reading[startingIndex : startingIndex+8]
+
+		for i := 0; i < 8; i++ {
+			if i < len(art) {
+				asciiArtLines[i] += art[i]
+			} else {
+				asciiArtLines[i] += strings.Repeat(" ", len(art[0]))
+			}
+		}
+		if cha == ' ' {
+			spacePosition = append(spacePosition, totalTextWidth)
+		}
+
+		totalTextWidth += len(art[0])
+	}
+
+	return spacePosition, asciiArtLines
 }
 
 type Winsize struct {
