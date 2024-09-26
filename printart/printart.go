@@ -22,6 +22,10 @@ func PrintArt(bannerFileSlice []string, inputString string, alignFlag string) {
 	if handleSpecialInputs(inputString) {
 		return
 	}
+	if align == "justify" {
+		inputString = strings.Join(strings.Fields(inputString), " ")
+	}
+
 	// Check for unprintable sequences
 	if checkUnprintableSequences(inputString) {
 		return
