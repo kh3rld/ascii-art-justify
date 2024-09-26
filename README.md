@@ -85,7 +85,7 @@ The project is structured into several packages:
 
 ## Testing
 
-Unit tests are recommended for ensuring the functionality of the code. You can run tests using:
+You can run tests using: Navigate to respective directories and run the following command.
 
 ```bash
 go test -v
