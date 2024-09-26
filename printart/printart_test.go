@@ -17,7 +17,7 @@ func TestPrintArt(t *testing.T) {
 		{
 			name: "Test with left alignment",
 			args: args{
-				bannerFileSlice: mockBannerFileSlice(), // Mock banner data
+				bannerFileSlice: mockBannerFileSlice(),
 				inputString:     "Hello",
 				alignFlag:       "--align=left",
 			},
@@ -79,13 +79,11 @@ func TestPrintArt(t *testing.T) {
 }
 
 func mockBannerFileSlice() []string {
-	// Mocking ASCII art for simplicity. This should match the characters' positions.
 	return []string{
-		"      ", " _  ", " | |", " | |", " | |", " | |", " | |", " |_|", // 'H'
-		"      ", "     ", "  | ", "  | ", "  | ", "  | ", "  | ", "  | ", // 'e'
-		"      ", "     ", "  | ", "  | ", "  | ", "  | ", "  | ", "  | ", // 'l'
-		"      ", "     ", "  | ", "  | ", "  | ", "  | ", "  | ", "  | ", // 'l'
-		"      ", " ___ ", " / _\\", "| | ", " | |", " | |", "|_| ", "     ", // 'o'
-		// Repeat for other characters...
+		"      ", " _  ", " | |", " | |", " | |", " | |", " | |", " |_|",
+		"      ", "     ", "  | ", "  | ", "  | ", "  | ", "  | ", "  | ",
+		"      ", "     ", "  | ", "  | ", "  | ", "  | ", "  | ", "  | ",
+		"      ", "     ", "  | ", "  | ", "  | ", "  | ", "  | ", "  | ",
+		"      ", " ___ ", " / _\\", "| | ", " | |", " | |", "|_| ", "     ",
 	}
 }
