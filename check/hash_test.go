@@ -6,7 +6,7 @@ import (
 )
 
 func TestValidFile(t *testing.T) {
-	fileData, err := os.ReadFile("./standard.txt")
+	fileData, err := os.ReadFile("../standard.txt")
 	if err != nil {
 		t.Fatalf("Failed to read file: %v", err)
 	}
