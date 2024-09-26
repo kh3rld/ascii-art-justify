@@ -18,8 +18,15 @@ func PrintArt(bannerFileSlice []string, inputString string, alignFlag string) {
 		}
 	}
 
-	// Handle special input cases
-	if handleSpecialInputs(inputString) {
+	if align == "justify" {
+		inputString = strings.Join(strings.Fields(inputString), " ")
+	}
+
+	// fmt.Println(align)
+	// fmt.Println(alignFlag)
+
+	if inputString == "\\n" {
+		fmt.Println()
 		return
 	}
 	// Check for unprintable sequences
