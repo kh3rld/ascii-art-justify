@@ -1,3 +1,3 @@
-module ascii-art-justify
+module justify
 
 go 1.22.2

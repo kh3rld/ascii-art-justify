@@ -1,50 +1,113 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"log"
 	"os"
+	"strings"
 
-	"ascii-art-justify/printart"
-	"ascii-art-justify/reading"
+	check "justify/checksum"
+	print "justify/printAscii"
+	output "justify/readWrite"
+	usage "justify/utils"
 )
 
+var banners = map[string]string{
+	"standard":   "standard.txt",
+	"thinkertoy": "thinkertoy.txt",
+	"shadow":     "shadow.txt",
+}
+
 func main() {
-	var bannerFont string
-	var alignFlag string
-	var inputString string
+	checksum := flag.Bool("checksum", false, "Check integrity of specified file")
+	flname := flag.String("output", "", "Usage: go run . [OPTION] [STRING] [BANNER]")
+	align := flag.String("align", "left", "Alignment type: center, left, right, justify")
+	flag.Parse()
 
-	args := os.Args[1:]
+	// Validate the align option
+	if *align != "center" && *align != "left" && *align != "right" && *align != "justify" {
+		usage.PrintUsage()
+		return
+	}
+
+	var presentF, correctF bool
+	flag.Visit(func(f *flag.Flag) {
+		if f.Name == "output" {
+			presentF = true
+			result := strings.Replace(os.Args[1], *flname, "", 1)
+			if !(result == "--output=") {
+				correctF = true
+			}
+		}
+	})
+
+	if presentF && correctF {
+		usage.OutputUsage()
+		return
+	}
+
+	args := flag.Args()
+
 	if len(args) == 0 {
-		fmt.Println("Usage: go run . [OPTION] [STRING] [BANNER]\n\nExample: go run . --align=right something standard")
+		usage.PrintUsage()
 		return
 	}
 
-	switch len(args) {
-	case 1:
-		inputString = args[0]
-	case 2:
-		alignFlag = args[0]
-		inputString = args[1]
-	case 3:
-		alignFlag = args[0]
-		inputString = args[1]
-		bannerFont = args[2]
-	default:
-		fmt.Println("Usage: go run . [OPTION] [STRING] [BANNER]\n\nExample: go run . --align=right something standard")
+	input := args[0]
+	var banner string
+
+	if len(args) > 1 {
+		banner = args[1]
+	} else {
+		banner = "standard"
+	}
+
+	filename, ok := banners[banner]
+	if !ok {
+		fmt.Println("Invalid banner specified.")
+		return
+	}
+	if *checksum {
+		err := check.ValidateFileChecksum(filename)
+		if err != nil {
+			log.Fatalf("Error checking integrity: %v", err)
+		}
+		fmt.Printf("Integrity check passed for file: %s\n", filename)
 		return
 	}
 
-	switch bannerFont {
-	case "standard":
-		bannerFont = "standard.txt"
-	case "shadow":
-		bannerFont = "shadow.txt"
-	case "thinkertoy":
-		bannerFont = "thinkertoy.txt"
-	default:
-		bannerFont = "standard.txt"
+	err := check.ValidateFileChecksum(filename)
+	if err != nil {
+		log.Printf("Error downloading or validating file: %v", err)
+		return
 	}
 
-	bannerFile := reading.Reading(bannerFont)
-	printart.PrintArt(bannerFile, inputString, alignFlag)
+	asciiArtGrid, err := output.ReadAscii(filename)
+	if err != nil {
+		log.Fatalf("Error reading ASCII map: %v", err)
+	}
+
+	data, err := print.WriteArt(input, asciiArtGrid)
+	if err != nil {
+		log.Fatalf("Error writing to file: %v", err)
+	}
+
+	if *flname != "" {
+		filename := strings.TrimPrefix(*flname, "--output=")
+		if filename == "" {
+			fmt.Println("Error: --output flag must be followed by a filename")
+			usage.PrintUsage()
+			os.Exit(1)
+		}
+		err = output.WriteAscii(data, filename)
+		if err != nil {
+			log.Printf("error: %v", err)
+		}
+	} else {
+		err = print.PrintArt(input, asciiArtGrid, *align)
+		if err != nil {
+			log.Printf("Error: %v", err)
+		}
+	}
 }

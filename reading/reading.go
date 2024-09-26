@@ -1,12 +1,11 @@
 package reading
 
 import (
+	"ascii-art-justify/check"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
-
-	"ascii-art-justify/check"
 )
 
 // Reading reads the content of the banner file and returns a slice of strings.
